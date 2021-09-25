@@ -4,6 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <StartupObject>Superjack.MultiSites.Api.Program</StartupObject>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <UserSecretsId>51d6ba02-e122-464b-84b1-3d7418bf2040</UserSecretsId>
   </PropertyGroup>
  
   <ItemGroup>

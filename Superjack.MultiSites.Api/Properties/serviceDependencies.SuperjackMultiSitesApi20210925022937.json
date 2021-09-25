@@ -3,6 +3,18 @@
     "apis1": {
       "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.ApiManagement/service/SuperjackMultiSitesApiapi/apis/SuperjackMultiSitesApi",
       "type": "apis.azure"
+    },
+    "mssql1": {
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourcegroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/superjackmultisitesapidbserver/databases/Superjack.MultiSites.Api_db",
+      "type": "mssql.azure",
+      "connectionId": "ConnectionStrings:MyNewDatabase",
+      "secretStore": "AzureAppSettings"
+    },
+    "identityapp1": {
+      "type": "identityapp",
+      "connectionId": "",
+      "suggestion": "true",
+      "ignored": "true"
     }
   }
 }

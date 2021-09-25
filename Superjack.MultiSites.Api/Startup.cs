@@ -22,6 +22,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Net.Http.Headers;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Identity.Web.UI;
+using Microsoft.Identity.Web;
 
 namespace Superjack.MultiSites.Api
 {
@@ -72,41 +76,56 @@ namespace Superjack.MultiSites.Api
       var appSettings = appSettingsSection.Get<AppSettings>();
       var key = Encoding.ASCII.GetBytes(appSettings.Secret);
 
-      services.AddAuthentication(x =>
-      {
-        x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-      })
-           .AddJwtBearer(x =>
-           {
-             x.Events = new JwtBearerEvents
-             {
-               OnTokenValidated = context =>
-               {
-                 var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                 var userId = int.Parse(context.Principal.Identity.Name);
-                 var user = userService.GetById(userId);
-                 if (user == null)
-                 {
-                    // return unauthorized if user no longer exists
-                    context.Fail("Unauthorized");
-                 }
-                 return Task.CompletedTask;
-               }
-             };
-             x.RequireHttpsMetadata = false;
-             x.SaveToken = true;
-             x.TokenValidationParameters = new TokenValidationParameters
-             {
-               ValidateIssuerSigningKey = true,
-               IssuerSigningKey = new SymmetricSecurityKey(key),
-               ValidateIssuer = false,
-               ValidateAudience = false
-             };
-           });
+
+            services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+                .AddMicrosoftIdentityWebApp(Configuration.GetSection("AzureAd"));
+
+            services.AddControllersWithViews(options =>
+            {
+                var policy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
+                options.Filters.Add(new AuthorizeFilter(policy));
+            });
+            services.AddRazorPages()
+                 .AddMicrosoftIdentityUI();
 
 
-      services.AddScoped<IBlockService, BlockService>();
+            //services.AddAuthentication(x =>
+            //{
+            //  x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //  x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //})
+            //     .AddJwtBearer(x =>
+            //     {
+            //       x.Events = new JwtBearerEvents
+            //       {
+            //         OnTokenValidated = context =>
+            //         {
+            //           var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+            //           var userId = int.Parse(context.Principal.Identity.Name);
+            //           var user = userService.GetById(userId);
+            //           if (user == null)
+            //           {
+            //              // return unauthorized if user no longer exists
+            //              context.Fail("Unauthorized");
+            //           }
+            //           return Task.CompletedTask;
+            //         }
+            //       };
+            //       x.RequireHttpsMetadata = false;
+            //       x.SaveToken = true;
+            //       x.TokenValidationParameters = new TokenValidationParameters
+            //       {
+            //         ValidateIssuerSigningKey = true,
+            //         IssuerSigningKey = new SymmetricSecurityKey(key),
+            //         ValidateIssuer = false,
+            //         ValidateAudience = false
+            //       };
+            //     });
+
+
+            services.AddScoped<IBlockService, BlockService>();
       services.AddScoped<IBlockFieldService, BlockFieldService>();
       services.AddScoped<IPageBlockService, PageBlockService>();
       services.AddScoped<IPageFieldService, PageFieldService>();
